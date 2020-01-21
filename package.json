@@ -12,9 +12,17 @@
   "engines": {
     "homebridge": ">=0.2.5"
   },
-  "author": "",
+  "author": "Paul Curry",
   "license": "MIT",
   "dependencies": {
     "apcaccess": "^1.1.2"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cr3ative/homebridge-apcaccess.git"
+  },
+  "bugs": {
+    "url": "https://github.com/cr3ative/homebridge-apcaccess/issues"
+  },
+  "homepage": "https://github.com/cr3ative/homebridge-apcaccess#readme"
 }
