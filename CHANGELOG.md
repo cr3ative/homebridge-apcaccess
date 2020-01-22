@@ -1,3 +1,7 @@
+# [0.0.4]
+
+- Tweak name config
+
 # [0.0.3]
 
 - Learned how to push changes to homekit using updateValue. So now it alerts properly!

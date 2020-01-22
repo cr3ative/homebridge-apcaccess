@@ -40,7 +40,7 @@ module.exports = homebridge => {
   homebridge.registerAccessory("homebridge-apcaccess", "APCAccess", APCAccess);
 };
 
-function APCAccess(log, config, name) {
+function APCAccess(log, config) {
   this.log = log;
   this.host = config["host"] || "localhost";
   this.port = config["port"] || "3551";
@@ -48,7 +48,7 @@ function APCAccess(log, config, name) {
   // The following can't be defined on boot, so define them optionally in config
   this.manufacturer = config["manufacturer"] || "American Power Conversion";
   this.model = config["model"] || "My Fantastic UPS";
-  this.name = name || "My Fantastic UPS";
+  this.name = config["name"] || "My Fantastic UPS";
   this.serial = config["serial"] || "123-456-789";
   this.contactState = 0; // refactor
   this.lowBattState = 0;
