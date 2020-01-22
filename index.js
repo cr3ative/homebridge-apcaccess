@@ -40,7 +40,7 @@ module.exports = homebridge => {
   homebridge.registerAccessory("homebridge-apcaccess", "APCAccess", APCAccess);
 };
 
-function APCAccess(log, config) {
+function APCAccess(log, config, name) {
   this.log = log;
   this.host = config["host"] || "localhost";
   this.port = config["port"] || "3551";
@@ -48,15 +48,18 @@ function APCAccess(log, config) {
   // The following can't be defined on boot, so define them optionally in config
   this.manufacturer = config["manufacturer"] || "American Power Conversion";
   this.model = config["model"] || "My Fantastic UPS";
-  this.name = config["name"] || "My Fantastic UPS";
+  this.name = name || "My Fantastic UPS";
   this.serial = config["serial"] || "123-456-789";
+  this.contactState = 0; // refactor
+  this.lowBattState = 0;
 
   this.client = new ApcAccess();
   this.client
     .connect(this.host, this.port)
     .then(() => {
       this.log("Connected!");
-      this.getContactState.bind(this);
+      // set up watcher
+      setInterval(this.doPolledChecks.bind(this), this.interval * 1000);
     })
     .catch(err => {
       this.log("Couldn't connect to service:", err);
@@ -82,6 +85,7 @@ function APCAccess(log, config) {
   this.contactSensor
     .getCharacteristic(Characteristic.StatusLowBattery)
     .on("get", this.getStatusLowBattery.bind(this));
+
 }
 
 APCAccess.prototype = {
@@ -90,10 +94,6 @@ APCAccess.prototype = {
       // BCHARGE
       let percentage = parseInt(result.BCHARGE, 10);
       this.log("Battery Level: ", percentage);
-      this.contactSensor.setCharacteristic(
-        Characteristic.BatteryLevel,
-        percentage
-      );
       callback(null, percentage);
     });
   },
@@ -108,7 +108,6 @@ APCAccess.prototype = {
           ? "NOT_CHARGING"
           : "CHARGING";
       this.log("Charging state: ", value);
-      this.contactSensor.setCharacteristic(Characteristic.ChargingState, value);
       callback(null, Characteristic.ChargingState[value]);
     });
   },
@@ -118,10 +117,6 @@ APCAccess.prototype = {
       let value =
         result.STATFLAG & 0x40 ? "BATTERY_LEVEL_LOW" : "BATTERY_LEVEL_NORMAL";
       this.log("Low Battery? ", value);
-      this.contactSensor.setCharacteristic(
-        Characteristic.StatusLowBattery,
-        value
-      );
       callback(null, Characteristic.StatusLowBattery[value]);
     });
   },
@@ -130,18 +125,32 @@ APCAccess.prototype = {
       let value = [
         result.STATFLAG & 0x08 ? "CONTACT_DETECTED" : "CONTACT_NOT_DETECTED"
       ];
-      this.contactSensor.setCharacteristic(
-        Characteristic.ContactSensorState,
-        value
-      );
-      if (callback) {
-        callback(null, Characteristic.ContactSensorState[value]);
+      callback(null, Characteristic.ContactSensorState[value]);
+    });
+  },
+  doPolledChecks: function(callback) {
+    this.client.getStatusJson().then(result => {
+      let contactValue = [
+        result.STATFLAG & 0x08 ? "CONTACT_DETECTED" : "CONTACT_NOT_DETECTED"
+      ];
+      let contactBool = Characteristic.ContactSensorState[contactValue];
+      let lowBattValue =
+        result.STATFLAG & 0x40 ? "BATTERY_LEVEL_LOW" : "BATTERY_LEVEL_NORMAL";
+      let lowBattBool = Characteristic.StatusLowBattery[lowBattValue];
+      // push
+      if (this.contactState !== contactBool) {
+        console.log('Pushing contact state change; ', contactBool);
+        this.contactSensor.getCharacteristic(Characteristic.ContactSensorState).updateValue(contactBool);
+        this.contactState = contactBool;
+      }
+      if (this.lowBattState !== lowBattBool) {
+        console.log('Pushing low battery state change; ', lowBattBool);
+        this.contactSensor.getCharacteristic(Characteristic.StatusLowBattery).updateValue(lowBattBool);
+        this.lowBattState = lowBattBool;
       }
     });
   },
   getServices: function() {
-    // watch contact state on an interval
-    setInterval(this.getContactState.bind(this), this.interval * 1000);
     return [this.informationService, this.contactSensor];
   }
 };
