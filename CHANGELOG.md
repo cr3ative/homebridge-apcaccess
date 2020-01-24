@@ -1,7 +1,8 @@
-# [0.0.5]
+# [0.0.5/0.0.6]
 
 - Cache the JSON result
 - Refactor state
+- Secure NPM profile and add keywords
 
 # [0.0.4]
 

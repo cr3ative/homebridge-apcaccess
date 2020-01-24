@@ -1,13 +1,17 @@
 {
   "name": "homebridge-apcaccess",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Ridiculously simple apcaccess wrapper",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "homebridge-plugin"
+    "homebridge-plugin",
+    "homebridge",
+    "apc",
+    "apcaccess",
+    "apcupsd"
   ],
   "engines": {
     "homebridge": ">=0.2.5"
