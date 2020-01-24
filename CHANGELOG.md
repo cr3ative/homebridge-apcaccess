@@ -1,3 +1,8 @@
+# [0.0.5]
+
+- Cache the JSON result
+- Refactor state
+
 # [0.0.4]
 
 - Tweak name config
