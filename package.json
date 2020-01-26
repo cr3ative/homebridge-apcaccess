@@ -4,8 +4,8 @@
   "description": "Ridiculously simple apcaccess wrapper",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "format": "prettier-eslint —eslint-config-path $(pwd)/.eslintrc.js \"$(pwd)/**/*.js\"",
+    "test": "npm run lint && npm run format",
+    "format": "prettier-eslint --write —eslint-config-path $(pwd)/.eslintrc.js \"$(pwd)/**/*.js\"",
     "lint": "eslint ."
   },
   "keywords": [

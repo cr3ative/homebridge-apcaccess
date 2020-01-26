@@ -31,7 +31,10 @@ class APCAccess {
     this.contactSensor = new Service.ContactSensor(config.name || 'APCAccess UPS');
     this.informationService = new Service.AccessoryInformation();
     this.informationService
-      .setCharacteristic(Characteristic.Manufacturer, config.manufacturer || 'American Power Conversion')
+      .setCharacteristic(
+        Characteristic.Manufacturer,
+        config.manufacturer || 'American Power Conversion',
+      )
       .setCharacteristic(Characteristic.Model, config.model || 'APCAccess UPS')
       .setCharacteristic(Characteristic.SerialNumber, config.serial || '0118-999-88199-9119-725-3');
     // End of vanity values ;)
@@ -89,9 +92,7 @@ class APCAccess {
   }
 
   getContactState(callback) {
-    const value = [
-      this.latestJSON.STATFLAG & 0x08 ? 'CONTACT_DETECTED' : 'CONTACT_NOT_DETECTED',
-    ];
+    const value = [this.latestJSON.STATFLAG & 0x08 ? 'CONTACT_DETECTED' : 'CONTACT_NOT_DETECTED'];
     callback(null, Characteristic.ContactSensorState[value]);
   }
 
