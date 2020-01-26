@@ -6,17 +6,13 @@ class APCAccess {
   constructor(log, config) {
     this.log = log;
     this.latestJSON = false;
-    this.host = config.host || 'localhost';
-    this.port = config.port || '3551';
-    this.interval = config.interval || 1;
 
-    this.client = new ApcAccess();
-    this.client
-      .connect(this.host, this.port)
+    this.client = new ApcAccess()
+      .connect(config.host || 'localhost', config.port || '3551')
       .then(() => {
         this.log('Connected!');
         // set up watcher
-        setInterval(this.getLatestJSON.bind(this), this.interval * 1000);
+        setInterval(this.getLatestJSON.bind(this), (config.interval || 1) * 1000);
       })
       .catch((err) => {
         this.log("Couldn't connect to service:", err);
