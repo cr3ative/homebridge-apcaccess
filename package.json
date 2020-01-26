@@ -1,10 +1,12 @@
 {
   "name": "homebridge-apcaccess",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "Ridiculously simple apcaccess wrapper",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier-eslint —eslint-config-path $(pwd)/.eslintrc.js \"$(pwd)/**/*.js\"",
+    "lint": "eslint ."
   },
   "keywords": [
     "homebridge-plugin",
@@ -28,5 +30,13 @@
   "bugs": {
     "url": "https://github.com/cr3ative/homebridge-apcaccess/issues"
   },
-  "homepage": "https://github.com/cr3ative/homebridge-apcaccess#readme"
+  "homepage": "https://github.com/cr3ative/homebridge-apcaccess#readme",
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.20.0",
+    "prettier": "^1.19.1",
+    "prettier-eslint": "^9.0.1",
+    "prettier-eslint-cli": "^5.0.0"
+  }
 }

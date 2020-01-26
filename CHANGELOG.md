@@ -1,3 +1,7 @@
+# [0.0.7]
+
+- ESLint and Prettier
+
 # [0.0.5/0.0.6]
 
 - Cache the JSON result
