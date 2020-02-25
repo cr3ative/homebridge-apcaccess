@@ -6,9 +6,9 @@ An [apcaccess](https://github.com/mapero/apcaccess) wrapper for [Homebridge](htt
 
 This accessory:
 
-- Is essentially a worse version of [homebridge-accessory-apcupsd](https://github.com/homespun/homebridge-accessory-apcupsd) which I was too dumb to get working; many thanks to homespun.
-- Publishes a `ContactSensorService` and a `BatteryService`
-- Publishes two subscribable events: `Contact State` and `Low Battery`. The rest pull when you query them.
+- Is essentially a worse version of [homespun/homebridge-accessory-apcupsd](https://github.com/homespun/homebridge-accessory-apcupsd) which I was too dumb to get working.
+- Publishes a `BatteryService` to show charging state / battery levels.
+- Publishes two subscribable events: `Contact State` and `Low Battery`, for your push alerting pleasure.
 
 # Configuration
 
