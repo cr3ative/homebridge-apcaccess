@@ -1,17 +1,14 @@
 # homebridge-apcaccess
 
-A moderately dumb [apcaccess](https://github.com/mapero/apcaccess) wrapper for [Homebridge](https://github.com/nfarina/homebridge).
+An [apcaccess](https://github.com/mapero/apcaccess) wrapper for [Homebridge](https://github.com/nfarina/homebridge). Supports precisely one UPS. If you're on battery power, the Contact Sensor is open.
 
-Supports precisely one UPS, appears as a Contact Sensor, and reports:
+<img src="https://user-images.githubusercontent.com/1850718/75247783-a0bd6b00-57ca-11ea-9391-0db0afdaf2cf.PNG" width="250"/>
 
-* If we're on mains power or not (as a Contact Sensor open (battery) / closed (mains))
-* Battery Level (via BatteryService)
-* Low Battery State (via BatteryService)
-* Charging State (via BatteryService)
+This accessory:
 
-The two main values, "Mains/Battery" and "Low Battery State" are "push" values and can be subscribed to. The rest are only queried when you look at the accessory.
-
-This is essentially a worse version of [homebridge-accessory-apcupsd](https://github.com/homespun/homebridge-accessory-apcupsd) which I was too dumb to get working; many thanks to homespun.
+- Is essentially a worse version of [homebridge-accessory-apcupsd](https://github.com/homespun/homebridge-accessory-apcupsd) which I was too dumb to get working; many thanks to homespun.
+- Publishes a `ContactSensorService` and a `BatteryService`
+- Publishes two subscribable events: `Contact State` and `Low Battery`. The rest pull when you query them.
 
 # Configuration
 
