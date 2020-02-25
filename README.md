@@ -4,10 +4,12 @@ A moderately dumb [apcaccess](https://github.com/mapero/apcaccess) wrapper for [
 
 Supports precisely one UPS, appears as a Contact Sensor, and reports:
 
-* Battery Level
-* Low Battery State
-* Charging State
-* If we're on mains power or not
+* If we're on mains power or not (as a Contact Sensor open (battery) / closed (mains))
+* Battery Level (via BatteryService)
+* Low Battery State (via BatteryService)
+* Charging State (via BatteryService)
+
+The two main values, "Mains/Battery" and "Low Battery State" are "push" values and can be subscribed to. The rest are only queried when you look at the accessory.
 
 This is essentially a worse version of [homebridge-accessory-apcupsd](https://github.com/homespun/homebridge-accessory-apcupsd) which I was too dumb to get working; many thanks to homespun.
 
