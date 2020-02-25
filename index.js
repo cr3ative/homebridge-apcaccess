@@ -7,7 +7,8 @@ class APCAccess {
     this.log = log;
     this.latestJSON = false;
 
-    this.client = new ApcAccess()
+    this.client = new ApcAccess();
+    this.client
       .connect(config.host || 'localhost', config.port || '3551')
       .then(() => {
         this.log('Connected!');

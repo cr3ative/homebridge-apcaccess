@@ -1,3 +1,7 @@
+# [0.0.8]
+
+- Fix client promise handling
+
 # [0.0.7]
 
 - ESLint and Prettier
