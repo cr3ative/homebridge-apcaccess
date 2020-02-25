@@ -1,3 +1,7 @@
+# [0.1.0]
+
+- Publish battery service in Home friendly way
+
 # [0.0.8]
 
 - Fix client promise handling

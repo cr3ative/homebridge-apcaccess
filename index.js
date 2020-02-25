@@ -36,23 +36,25 @@ class APCAccess {
       .setCharacteristic(Characteristic.SerialNumber, config.serial || '0118-999-88199-9119-725-3');
     // End of vanity values ;)
 
+    this.batteryService = new Service.BatteryService();
+
     this.contactSensor
       .getCharacteristic(Characteristic.ContactSensorState)
       .on('get', this.getContactState.bind(this));
-    this.contactSensor
+    this.batteryService
       .getCharacteristic(Characteristic.BatteryLevel)
       .on('get', this.getBatteryLevel.bind(this));
-    this.contactSensor
+    this.batteryService
       .getCharacteristic(Characteristic.ChargingState)
       .on('get', this.getChargingState.bind(this));
-    this.contactSensor
+    this.batteryService
       .getCharacteristic(Characteristic.StatusLowBattery)
       .on('get', this.getStatusLowBattery.bind(this));
   }
 
   getServices() {
     // Required by Homebridge; expose services this accessory claims to have
-    return [this.informationService, this.contactSensor];
+    return [this.informationService, this.contactSensor, this.batteryService];
   }
 
   getLatestJSON() {
