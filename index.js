@@ -67,6 +67,10 @@ class APCAccess {
   getBatteryLevel(callback) {
     // BCHARGE
     const percentage = parseInt(this.latestJSON.BCHARGE, 10);
+    if (isNaN(percentage)) {
+      this.log('Battery level NaN problem; recorded as ', this.latestJSON.BCHARGE, this.latestJSON);
+      percentage = 0;
+    }
     this.log('Battery Level: ', percentage);
     callback(null, percentage);
   }
