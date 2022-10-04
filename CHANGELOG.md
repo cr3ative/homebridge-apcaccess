@@ -1,3 +1,7 @@
+# [0.1.2]
+
+- Report zero battery level if no bad value passed through to avoid crash.
+
 # [0.1.0]
 
 - Publish battery service in Home friendly way
