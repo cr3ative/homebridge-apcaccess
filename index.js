@@ -66,12 +66,17 @@ class APCAccess {
 
   getBatteryLevel(callback) {
     // BCHARGE
-    let percentage = parseInt(this.latestJSON.BCHARGE, 10);
-    if (!isNaN(percentage)) {
-      percentage = 0;
+    let battPctValue = 0;
+    let battVal = this.latestJSON.BCHARGE;
+    if(battVal != undefined) {
+        const battArray = battVal.split(".");
+        battPctValue = parseFloat(parseFloat(battArray[0]*-1)*-1);
+        this.log('Battery Level: ', battPctValue);
+    } else {
+        battPctValue = 0;
+        this.log('Battery Level: ', battPctValue);
     }
-    this.log('Battery Level: ', percentage);
-    callback(null, percentage);
+    callback(null, battPctValue);
   }
 
   getChargingState(callback) {
