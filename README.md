@@ -23,7 +23,9 @@ Whack something like this in your `accessories: []` section of homebridge config
     "manufacturer": "Fujitsu APC",
     "model": "FJT750i",
     "serial": "AS1305696928",
-    "interval": 1
+    "interval": 1,
+    "logging": true,
+    "temperatureSensor": false
 }
 ```
 

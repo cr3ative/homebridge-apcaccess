@@ -4,7 +4,9 @@ const ApcAccess = require('apcaccess');
 
 class APCAccess {
   constructor(log, config) {
-    this.log = log;
+    this.config = config;
+    this.log = function() { return true; }
+    if (config.logging == true) { this.log = log; }
     this.latestJSON = false;
 
     this.client = new ApcAccess();
@@ -50,11 +52,20 @@ class APCAccess {
     this.batteryService
       .getCharacteristic(Characteristic.StatusLowBattery)
       .on('get', this.getStatusLowBattery.bind(this));
+  
+    this.temperatureService = new Service.TemperatureSensor();
+    this.temperatureService
+      .getCharacteristic(Characteristic.CurrentTemperature)
+      .on('get', this.getTemperature.bind(this));
   }
 
   getServices() {
     // Required by Homebridge; expose services this accessory claims to have
-    return [this.informationService, this.contactSensor, this.batteryService];
+    let services = [this.informationService, this.contactSensor, this.batteryService];
+    if (this.config.temperatureSensor == true) {
+      services.push(this.temperatureService);
+    }
+    return services;
   }
 
   getLatestJSON() {
@@ -99,8 +110,24 @@ class APCAccess {
   }
 
   getContactState(callback) {
+    // STATFLAG
     const value = [this.latestJSON.STATFLAG & 0x08 ? 'CONTACT_DETECTED' : 'CONTACT_NOT_DETECTED'];
     callback(null, Characteristic.ContactSensorState[value]);
+  }
+
+  getTemperature(callback) {
+    // ITEMP
+    let tempPctValue = 0;
+    let tempVal = this.latestJSON.ITEMP;
+    if(tempVal != undefined) {
+        const tempArray = tempVal.split(".");
+        tempPctValue = parseFloat(parseFloat(tempArray[0]*-1)*-1);
+        this.log('Temperature: ', tempPctValue);
+    } else {
+        tempPctValue = 0;
+        this.log('Unable to determine Temperature: ', this.latestJSON);
+    }
+    callback(null, tempPctValue);
   }
 
   doPolledChecks() {

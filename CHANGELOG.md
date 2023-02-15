@@ -1,3 +1,8 @@
+# [0.2.0]
+
+- Add optional temperature sensor.
+- Logging off by default, add configuration switch.
+
 # [0.1.2]
 
 - Report zero battery level if no bad value passed through to avoid crash.
