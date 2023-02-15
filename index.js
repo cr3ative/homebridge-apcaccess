@@ -5,8 +5,12 @@ const ApcAccess = require('apcaccess');
 class APCAccess {
   constructor(log, config) {
     this.config = config;
-    this.log = function() { return true; }
-    if (config.logging == true) { this.log = log; }
+    this.log = function blankLogger() {
+      return true;
+    };
+    if (config.logging === true) {
+      this.log = log;
+    }
     this.latestJSON = false;
 
     this.client = new ApcAccess();
@@ -52,7 +56,7 @@ class APCAccess {
     this.batteryService
       .getCharacteristic(Characteristic.StatusLowBattery)
       .on('get', this.getStatusLowBattery.bind(this));
-  
+
     this.temperatureService = new Service.TemperatureSensor();
     this.temperatureService
       .getCharacteristic(Characteristic.CurrentTemperature)
@@ -61,8 +65,8 @@ class APCAccess {
 
   getServices() {
     // Required by Homebridge; expose services this accessory claims to have
-    let services = [this.informationService, this.contactSensor, this.batteryService];
-    if (this.config.temperatureSensor == true) {
+    const services = [this.informationService, this.contactSensor, this.batteryService];
+    if (this.config.temperatureSensor === true) {
       services.push(this.temperatureService);
     }
     return services;
@@ -78,14 +82,14 @@ class APCAccess {
   getBatteryLevel(callback) {
     // BCHARGE
     let battPctValue = 0;
-    let battVal = this.latestJSON.BCHARGE;
-    if(battVal != undefined) {
-        const battArray = battVal.split(".");
-        battPctValue = parseFloat(parseFloat(battArray[0]*-1)*-1);
-        this.log('Battery Level: ', battPctValue);
+    const battVal = this.latestJSON.BCHARGE;
+    if (battVal !== undefined) {
+      const battArray = battVal.split('.');
+      battPctValue = parseFloat(parseFloat(battArray[0] * -1) * -1);
+      this.log('Battery Level: ', battPctValue);
     } else {
-        battPctValue = 0;
-        this.log('Battery Level: ', battPctValue);
+      battPctValue = 0;
+      this.log('Battery Level: ', battPctValue);
     }
     callback(null, battPctValue);
   }
@@ -118,14 +122,14 @@ class APCAccess {
   getTemperature(callback) {
     // ITEMP
     let tempPctValue = 0;
-    let tempVal = this.latestJSON.ITEMP;
-    if(tempVal != undefined) {
-        const tempArray = tempVal.split(".");
-        tempPctValue = parseFloat(parseFloat(tempArray[0]*-1)*-1);
-        this.log('Temperature: ', tempPctValue);
+    const tempVal = this.latestJSON.ITEMP;
+    if (tempVal !== undefined) {
+      const tempArray = tempVal.split('.');
+      tempPctValue = parseFloat(parseFloat(tempArray[0] * -1) * -1);
+      this.log('Temperature: ', tempPctValue);
     } else {
-        tempPctValue = 0;
-        this.log('Unable to determine Temperature: ', this.latestJSON);
+      tempPctValue = 0;
+      this.log('Unable to determine Temperature: ', this.latestJSON);
     }
     callback(null, tempPctValue);
   }

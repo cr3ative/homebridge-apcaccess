@@ -1,4 +1,4 @@
-# [0.2.0]
+# [0.2.1]
 
 - Add optional temperature sensor.
 - Logging off by default, add configuration switch.
