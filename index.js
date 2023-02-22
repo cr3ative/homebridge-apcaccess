@@ -1,22 +1,23 @@
 let Service;
 let Characteristic;
 const ApcAccess = require('apcaccess');
+const logUpdate = require('./lib/logUpdate')
 
 class APCAccess {
   constructor(log, config) {
-    this.log = log;
+    this.log = logUpdate(log);
     this.latestJSON = false;
 
     this.client = new ApcAccess();
     this.client
       .connect(config.host || 'localhost', config.port || '3551')
       .then(() => {
-        this.log('Connected!');
+        this.log.info('Connected!');
         // set up watcher
         setInterval(this.getLatestJSON.bind(this), (config.interval || 1) * 1000);
       })
       .catch((err) => {
-        this.log("Couldn't connect to service:", err);
+        this.log.error("Couldn't connect to service:", err);
       });
 
     this.state = {
@@ -68,14 +69,13 @@ class APCAccess {
     // BCHARGE
     let battPctValue = 0;
     let battVal = this.latestJSON.BCHARGE;
+
     if(battVal != undefined) {
         const battArray = battVal.split(".");
         battPctValue = parseFloat(parseFloat(battArray[0]*-1)*-1);
-        this.log('Battery Level: ', battPctValue);
-    } else {
-        battPctValue = 0;
-        this.log('Battery Level: ', battPctValue);
-    }
+    } 
+
+    this.log.update('Battery Level: ', battPctValue);    
     callback(null, battPctValue);
   }
 
@@ -87,14 +87,14 @@ class APCAccess {
       : this.latestJSON.STATFLAG & 0x10 || percentage === 100
         ? 'NOT_CHARGING'
         : 'CHARGING';
-    this.log('Charging state: ', value);
+    this.log.update('Charging state: ', value);
     callback(null, Characteristic.ChargingState[value]);
   }
 
   getStatusLowBattery(callback) {
     // STATFLAG
     const value = this.latestJSON.STATFLAG & 0x40 ? 'BATTERY_LEVEL_LOW' : 'BATTERY_LEVEL_NORMAL';
-    this.log('Low Battery? ', value);
+    this.log.update('Low Battery? ', value);
     callback(null, Characteristic.StatusLowBattery[value]);
   }
 
@@ -112,14 +112,14 @@ class APCAccess {
     const lowBattBool = Characteristic.StatusLowBattery[lowBattValue];
     // push
     if (this.state.contact !== contactBool) {
-      console.log('Pushing contact state change; ', contactBool, this.state.contact);
+      console.log.debug('Pushing contact state change; ', contactBool, this.state.contact);
       this.contactSensor
         .getCharacteristic(Characteristic.ContactSensorState)
         .updateValue(contactBool);
       this.state.contact = contactBool;
     }
     if (this.state.lowBattery !== lowBattBool) {
-      console.log('Pushing low battery state change; ', lowBattBool, this.state.lowBattery);
+      console.log.debug('Pushing low battery state change; ', lowBattBool, this.state.lowBattery);
       this.contactSensor
         .getCharacteristic(Characteristic.StatusLowBattery)
         .updateValue(lowBattBool);
