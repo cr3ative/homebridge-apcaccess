@@ -1,7 +1,7 @@
 let Service;
 let Characteristic;
 const ApcAccess = require('apcaccess');
-const logUpdate = require('./lib/logUpdate')
+const logUpdate = require('./lib/logUpdate');
 
 class APCAccess {
   constructor(log, config) {
