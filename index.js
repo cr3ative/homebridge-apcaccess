@@ -1,18 +1,14 @@
 let Service;
 let Characteristic;
 const ApcAccess = require('apcaccess');
-const logUpdate = require('./lib/logUpdate');
+const { logOnlyError, logMin } = require('./lib/logUpdate');
 
 class APCAccess {
   constructor(log, config) {
     this.config = config;
-    this.log = logUpdate(log);
+    this.log = logMin(log);
     if (config.errorLogsOnly === true) {
-      this.log = {
-        error: console.error,
-        info: () => true,
-        update: () => true,
-      };
+      this.log = logOnlyError(log);
     }
     this.latestJSON = false;
 
