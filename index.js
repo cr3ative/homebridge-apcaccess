@@ -1,23 +1,36 @@
-let Service;
-let Characteristic;
 const ApcAccess = require('apcaccess');
 const { logOnlyError, logMin } = require('./lib/logUpdate');
 
+const DEFAULT_INTERVAL = 1
+const DEFAULT_NAME = 'APC UPS'
+const DEFAULT_MANIFACTURAR = 'American Power Conversion'
+const DEFAULT_MODEL = 'APCAccess UPS'
+const DEFAULT_PORT =  '3551'
+const FULLY_CHARGED = 100
+const SECOND = 1000
+const UNKOWN = 'unkown'
+
+const UPS_ACTIVE = 0x08
+const UPS_BATT_LOW = 0x40
+const UPS_NOT_CHARGEABLE = 0x80
+const UPS_NOT_CHARGING = 0x10 
+
+let Service;
+let Characteristic;
+
 class APCAccess {
   constructor(log, config) {
-    this.config = config;
+    this.config = config || Object.create(null);
     this.log = config.errorLogsOnly ? logOnlyError(log) :logMin(log);
     this.latestJSON = false;
 
-    if(!config || Object.keys(config).length === 0) return // No config
-
     this.client = new ApcAccess();
     this.client
-      .connect(config.host || 'localhost', config.port || '3551')
+      .connect(config.host || 'localhost', config.port || DEFAULT_PORT)
       .then(() => {
         this.log.info('Connected!');
         // set up watcher
-        setInterval(this.getLatestJSON.bind(this), (config.interval || 1) * 1000);
+        setInterval(this.getLatestJSON.bind(this), (config.interval || DEFAULT_INTERVAL) * SECOND);
       })
       .catch((err) => {
         this.log.error("Couldn't connect to service:", err);
@@ -29,7 +42,7 @@ class APCAccess {
     };
 
     // The following can't be defined on boot, so define them optionally in config
-    this.contactSensor = new Service.ContactSensor(config.name || 'APC UPS');
+    this.contactSensor = new Service.ContactSensor(config.name || DEFAULT_NAME);
     this.contactSensor
       .getCharacteristic(Characteristic.ContactSensorState)
       .on('get', this.getContactState.bind(this));
@@ -38,16 +51,16 @@ class APCAccess {
     this.informationService
       .setCharacteristic(
         Characteristic.Manufacturer,
-        config.manufacturer || 'American Power Conversion',
+        config.manufacturer || DEFAULT_MANIFACTURAR,
       )
       // I see MODEL: 'Smart-UPS 750 ', in the data
-      .setCharacteristic(Characteristic.Model, config.model || 'APCAccess UPS')
+      .setCharacteristic(Characteristic.Model, config.model || DEFAULT_MODEL)
 
       // At least for my device I'm seeing a S/N being return in the data
       // I'm also seeing Firmware version, which can also be set as a characteristic in HK
       // SERIALNO: 'AS1539123101  ',
       // FIRMWARE: 'UPS 09.3 / ID=18',
-      .setCharacteristic(Characteristic.SerialNumber, config.serial || 'unkown');
+      .setCharacteristic(Characteristic.SerialNumber, config.serial || UNKOWN);
     // End of vanity values ;)
 
     this.batteryService = new Service.BatteryService();
@@ -104,9 +117,9 @@ class APCAccess {
   getChargingState(callback) {
     // STATFLAG
     const percentage = parseInt(this.latestJSON.BCHARGE, 10);
-    const value = this.latestJSON.STATFLAG & 0x80
+    const value = this.latestJSON.STATFLAG & UPS_NOT_CHARGEABLE
       ? 'NOT_CHARGEABLE'
-      : this.latestJSON.STATFLAG & 0x10 || percentage === 100
+      : this.latestJSON.STATFLAG & UPS_NOT_CHARGING || percentage === FULLY_CHARGED
         ? 'NOT_CHARGING'
         : 'CHARGING';
 
@@ -116,7 +129,7 @@ class APCAccess {
 
   getStatusLowBattery(callback) {
     // STATFLAG
-    const value = this.latestJSON.STATFLAG & 0x40 ? 'BATTERY_LEVEL_LOW' : 'BATTERY_LEVEL_NORMAL';
+    const value = this.latestJSON.STATFLAG & UPS_BATT_LOW ? 'BATTERY_LEVEL_LOW' : 'BATTERY_LEVEL_NORMAL';
 
     this.log.update.info('Low Battery? ', value);
     callback(null, Characteristic.StatusLowBattery[value]);
@@ -124,7 +137,7 @@ class APCAccess {
 
   getContactState(callback) {
     // STATFLAG
-    const value = [this.latestJSON.STATFLAG & 0x08 ? 'CONTACT_DETECTED' : 'CONTACT_NOT_DETECTED'];
+    const value = [this.latestJSON.STATFLAG & UPS_ACTIVE ? 'CONTACT_DETECTED' : 'CONTACT_NOT_DETECTED'];
 
     if (value === 'CONTACT_NOT_DETECTED') {
       this.log.update.warn('UPS Active - estimated time remaining:', this.latestJSON.TIMELEFT)
@@ -151,10 +164,10 @@ class APCAccess {
 
   doPolledChecks() {
     const contactValue = [
-      this.latestJSON.STATFLAG & 0x08 ? 'CONTACT_DETECTED' : 'CONTACT_NOT_DETECTED',
+      this.latestJSON.STATFLAG & UPS_ACTIVE ? 'CONTACT_DETECTED' : 'CONTACT_NOT_DETECTED',
     ];
     const contactBool = Characteristic.ContactSensorState[contactValue];
-    const lowBattValue = this.latestJSON.STATFLAG & 0x40 ? 'BATTERY_LEVEL_LOW' : 'BATTERY_LEVEL_NORMAL';
+    const lowBattValue = this.latestJSON.STATFLAG & UPS_BATT_LOW ? 'BATTERY_LEVEL_LOW' : 'BATTERY_LEVEL_NORMAL';
     const lowBattBool = Characteristic.StatusLowBattery[lowBattValue];
 
     // push
