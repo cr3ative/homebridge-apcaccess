@@ -8,7 +8,8 @@ This accessory:
 
 - Is essentially a worse version of [homespun/homebridge-accessory-apcupsd](https://github.com/homespun/homebridge-accessory-apcupsd) which I was too dumb to get working.
 - Publishes a `BatteryService` to show charging state / battery levels.
-- Publishes two subscribable events: `Contact State` and `Low Battery`, for your push alerting pleasure.
+- Publishes `ContactSensor` two subscribable events: `Contact State` and `Low Battery`, for your push alerting pleasure.
+- Optionally publishes a `TemperatureSensor` if you have a fancy UPS which reports this.
 
 # Configuration
 
@@ -23,7 +24,9 @@ Whack something like this in your `accessories: []` section of homebridge config
     "manufacturer": "Fujitsu APC",
     "model": "FJT750i",
     "serial": "AS1305696928",
-    "interval": 1
+    "interval": 1,
+    "temperatureSensor": false,
+    "errorLogsOnly": false
 }
 ```
 

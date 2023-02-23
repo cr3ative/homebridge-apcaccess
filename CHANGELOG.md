@@ -1,3 +1,8 @@
+# [0.2.2]
+
+- Add optional temperature sensor. Optional temperature sensor added by [ThisIsQasim](https://github.com/ThisIsQasim). Thank you!
+- Logging reduced by default, and new option to omit all logging except errors. Logging improvements by [davidjbradshaw](https://github.com/davidjbradshaw). Thank you!
+
 # [0.1.2]
 
 - Report zero battery level if no bad value passed through to avoid crash.
