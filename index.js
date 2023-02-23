@@ -145,14 +145,14 @@ class APCAccess {
     const lowBattBool = Characteristic.StatusLowBattery[lowBattValue];
     // push
     if (this.state.contact !== contactBool) {
-      console.log.debug('Pushing contact state change; ', contactBool, this.state.contact);
+      this.log.debug('Pushing contact state change; ', contactBool, this.state.contact);
       this.contactSensor
         .getCharacteristic(Characteristic.ContactSensorState)
         .updateValue(contactBool);
       this.state.contact = contactBool;
     }
     if (this.state.lowBattery !== lowBattBool) {
-      console.log.debug('Pushing low battery state change; ', lowBattBool, this.state.lowBattery);
+      this.log.debug('Pushing low battery state change; ', lowBattBool, this.state.lowBattery);
       this.contactSensor
         .getCharacteristic(Characteristic.StatusLowBattery)
         .updateValue(lowBattBool);
