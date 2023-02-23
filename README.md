@@ -13,17 +13,15 @@ This accessory:
 
 # Configuration
 
-Whack something like this in your `accessories: []` section of homebridge config:
+The plugin will run with these default values, they can be changed the your `accessories: []` section of homebridge config:
 
 ```
 {
-    "name": "UPS",
-    "accessory": "APCAccess",
-    "host": "192.168.86.34",
+    "name": "APC UPS",
+    "host": "127.0.0.1",
     "port": 3551,
-    "manufacturer": "Fujitsu APC",
-    "model": "FJT750i",
-    "serial": "AS1305696928",
+    "manufacturer": "American Power Conversion'",
+    "model": "APCAccess UPS",
     "interval": 1,
     "temperatureSensor": false,
     "errorLogsOnly": false
