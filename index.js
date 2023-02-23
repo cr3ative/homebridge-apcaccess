@@ -38,10 +38,13 @@ class APCAccess {
         Characteristic.Manufacturer,
         config.manufacturer || 'American Power Conversion',
       )
+      // I see MODEL: 'Smart-UPS 750 ', in the data
       .setCharacteristic(Characteristic.Model, config.model || 'APCAccess UPS')
 
       // At least for my device I'm seeing a S/N being return in the data
       // I'm also seeing Firmware version, which can also be set as a characteristic in HK
+      // SERIALNO: 'AS1539123101  ',
+      // FIRMWARE: 'UPS 09.3 / ID=18',
       .setCharacteristic(Characteristic.SerialNumber, config.serial || '0118-999-88199-9119-725-3');
     // End of vanity values ;)
 
@@ -120,6 +123,11 @@ class APCAccess {
   getContactState(callback) {
     // STATFLAG
     const value = [this.latestJSON.STATFLAG & 0x08 ? 'CONTACT_DETECTED' : 'CONTACT_NOT_DETECTED'];
+
+    // it would be good to log out start time as a warning here
+    if (value === 'CONTACT_NOT_DETECTED') {
+      this.warn('UPS Active', this.latestJSON.STARTTIME)
+    }
 
     callback(null, Characteristic.ContactSensorState[value]);
   }
