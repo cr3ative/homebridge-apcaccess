@@ -9,6 +9,8 @@ class APCAccess {
     this.log = config.errorLogsOnly ? logOnlyError(log) :logMin(log);
     this.latestJSON = false;
 
+    if(!config || Object.keys(config).length === 0) return // No config
+
     this.client = new ApcAccess();
     this.client
       .connect(config.host || 'localhost', config.port || '3551')
@@ -27,7 +29,7 @@ class APCAccess {
     };
 
     // The following can't be defined on boot, so define them optionally in config
-    this.contactSensor = new Service.ContactSensor(config.name || 'APCAccess UPS');
+    this.contactSensor = new Service.ContactSensor(config.name || 'APC UPS');
     this.contactSensor
       .getCharacteristic(Characteristic.ContactSensorState)
       .on('get', this.getContactState.bind(this));
@@ -45,7 +47,7 @@ class APCAccess {
       // I'm also seeing Firmware version, which can also be set as a characteristic in HK
       // SERIALNO: 'AS1539123101  ',
       // FIRMWARE: 'UPS 09.3 / ID=18',
-      .setCharacteristic(Characteristic.SerialNumber, config.serial || '0118-999-88199-9119-725-3');
+      .setCharacteristic(Characteristic.SerialNumber, config.serial || 'unkown');
     // End of vanity values ;)
 
     this.batteryService = new Service.BatteryService();
@@ -95,7 +97,7 @@ class APCAccess {
       battPctValue = parseFloat(parseFloat(battArray[0] * -1) * -1);
     }
 
-    this.log.update('Battery Level: ', battPctValue);
+    this.log.update.info('Battery Level: ', battPctValue);
     callback(null, battPctValue);
   }
 
@@ -108,7 +110,7 @@ class APCAccess {
         ? 'NOT_CHARGING'
         : 'CHARGING';
 
-    this.log.update('Charging state: ', value);
+    this.log.update.info('Charging state: ', value);
     callback(null, Characteristic.ChargingState[value]);
   }
 
@@ -116,7 +118,7 @@ class APCAccess {
     // STATFLAG
     const value = this.latestJSON.STATFLAG & 0x40 ? 'BATTERY_LEVEL_LOW' : 'BATTERY_LEVEL_NORMAL';
 
-    this.log.update('Low Battery? ', value);
+    this.log.update.info('Low Battery? ', value);
     callback(null, Characteristic.StatusLowBattery[value]);
   }
 
@@ -124,9 +126,8 @@ class APCAccess {
     // STATFLAG
     const value = [this.latestJSON.STATFLAG & 0x08 ? 'CONTACT_DETECTED' : 'CONTACT_NOT_DETECTED'];
 
-    // it would be good to log out start time as a warning here
     if (value === 'CONTACT_NOT_DETECTED') {
-      this.warn('UPS Active', this.latestJSON.STARTTIME)
+      this.log.update.warn('UPS Active - estimated time remaining:', this.latestJSON.TIMELEFT)
     }
 
     callback(null, Characteristic.ContactSensorState[value]);
@@ -140,9 +141,9 @@ class APCAccess {
     if (tempVal !== undefined) {
       const tempArray = tempVal.split('.');
       tempPctValue = parseFloat(parseFloat(tempArray[0] * -1) * -1);
-      this.log.update('Temperature: ', tempPctValue);
+      this.log.update.info('Temperature: ', tempPctValue);
     } else {
-      this.log.error('Unable to determine Temperature: ', this.latestJSON);
+      this.log.update.error('Unable to determine Temperature');
     }
 
     callback(null, tempPctValue);
