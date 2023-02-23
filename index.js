@@ -141,7 +141,7 @@ class APCAccess {
     const value = [this.latestJSON.STATFLAG & UPS_ACTIVE ? 'CONTACT_DETECTED' : 'CONTACT_NOT_DETECTED'];
 
     if (value === 'CONTACT_NOT_DETECTED') {
-      this.log.update.warn('UPS Active - estimated time remaining:', this.latestJSON.TIMELEFT)
+      this.log.update.warn('Power Disconnected - Estimated time remaining:', this.latestJSON.TIMELEFT)
     }
 
     callback(null, Characteristic.ContactSensorState[value]);
