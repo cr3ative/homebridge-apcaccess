@@ -90,7 +90,7 @@ class APCAccess {
     let battPctValue = 0;
     const battVal = this.latestJSON.BCHARGE;
 
-    if (battVal) {
+    if (battVal !== undefined) {
       const battArray = battVal.split('.');
       battPctValue = parseFloat(parseFloat(battArray[0] * -1) * -1);
     }
