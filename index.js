@@ -54,13 +54,7 @@ class APCAccess {
         Characteristic.Manufacturer,
         config.manufacturer || DEFAULT_MANIFACTURER,
       )
-      // I see MODEL: 'Smart-UPS 750 ', in the data
       .setCharacteristic(Characteristic.Model, config.model || DEFAULT_MODEL)
-
-      // At least for my device I'm seeing a S/N being return in the data
-      // I'm also seeing Firmware version, which can also be set as a characteristic in HK
-      // SERIALNO: 'AS1539123101  ',
-      // FIRMWARE: 'UPS 09.3 / ID=18',
       .setCharacteristic(Characteristic.SerialNumber, config.serial || UNKOWN);
     // End of vanity values ;)
 
