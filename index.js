@@ -3,9 +3,10 @@ const { logOnlyError, logMin } = require('./lib/logUpdate');
 
 const DEFAULT_INTERVAL = 1
 const DEFAULT_NAME = 'APC UPS'
-const DEFAULT_MANIFACTURAR = 'American Power Conversion'
+const DEFAULT_MANIFACTURER = 'American Power Conversion'
 const DEFAULT_MODEL = 'APCAccess UPS'
 const DEFAULT_PORT =  '3551'
+
 const FULLY_CHARGED = 100
 const SECOND = 1000
 const UNKOWN = 'unkown'
@@ -51,7 +52,7 @@ class APCAccess {
     this.informationService
       .setCharacteristic(
         Characteristic.Manufacturer,
-        config.manufacturer || DEFAULT_MANIFACTURAR,
+        config.manufacturer || DEFAULT_MANIFACTURER,
       )
       // I see MODEL: 'Smart-UPS 750 ', in the data
       .setCharacteristic(Characteristic.Model, config.model || DEFAULT_MODEL)
