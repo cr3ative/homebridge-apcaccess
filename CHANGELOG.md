@@ -1,7 +1,7 @@
 # [0.2.1]
 
-- Add optional temperature sensor.
-- Logging off by default, add configuration switch.
+- Add optional temperature sensor. Optional temperature sensor added by [ThisIsQasim](https://github.com/ThisIsQasim). Thank you!
+- Logging reduced by default, and new option to omit all logging except errors. Logging improvements by [davidjbradshaw](https://github.com/davidjbradshaw). Thank you!
 
 # [0.1.2]
 

@@ -6,11 +6,13 @@ const logUpdate = require('./lib/logUpdate');
 class APCAccess {
   constructor(log, config) {
     this.config = config;
-    this.log = function blankLogger() {
-      return true;
-    };
-    if (config.logging === true) {
-      this.log = logUpdate(log);
+    this.log = logUpdate(log);
+    if (config.errorLogsOnly === true) {
+      this.log = {
+        error: console.error,
+        info: () => true,
+        update: () => true,
+      };
     }
     this.latestJSON = false;
 

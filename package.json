@@ -1,6 +1,6 @@
 {
   "name": "homebridge-apcaccess",
-  "version": "0.2.1-rc.0",
+  "version": "0.2.1",
   "description": "Ridiculously simple apcaccess wrapper",
   "main": "index.js",
   "scripts": {
