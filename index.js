@@ -62,8 +62,10 @@ class APCAccess {
     this.batteryService
       .getCharacteristic(Characteristic.BatteryLevel)
       .on('get', this.getBatteryLevel.bind(this))
+    this.batteryService
       .getCharacteristic(Characteristic.ChargingState)
       .on('get', this.getChargingState.bind(this))
+    this.batteryService
       .getCharacteristic(Characteristic.StatusLowBattery)
       .on('get', this.getStatusLowBattery.bind(this));
 
