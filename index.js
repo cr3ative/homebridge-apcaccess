@@ -107,11 +107,7 @@ class APCAccess {
   }
 
   getBatteryLevel(callback) {
-    const battPctValue = this.parseBatteryLevel();
-
-    if(this.loaded) this.log.update.info('Battery Level:', `${battPctValue}% (${this.latestJSON.TIMELEFT})`);
-    
-    callback(null, battPctValue);
+    callback(null, this.parseBatteryLevel());
   }
 
   getChargingState(callback) {
@@ -143,6 +139,8 @@ class APCAccess {
   }
 
   parseBatteryLevel  = () =>  this.loaded ? parseInt(this.latestJSON.BCHARGE, 10) : 0;
+
+  parseTimeLeft = ( Minutes) => this.loaded ? parseInt(this.latestJSON.TIMELEFT, 10) : 0;
 
   parseContactValue = () => (this.latestJSON.STATFLAG & UPS_ACTIVE ? 'CONTACT_DETECTED' : 'CONTACT_NOT_DETECTED');
 
@@ -198,10 +196,25 @@ class APCAccess {
     }
   }
 
+  checkBatteryLevel() {
+    const batteryLevel = this.parseBatteryLevel();
+
+    this.log.update.info('Battery Level:', `${batteryLevel}% (${this.parseTimeLeft()} estimated minutes remaining)`);
+
+    if (this.state.batteryLevel !== batteryLevel) {
+      this.log.debug('Pushing battery level change; ', batteryLevel, this.state.batteryLevel);
+      this.batteryService
+        .getCharacteristic(Characteristic.BatteryLevel)
+        .updateValue(batteryLevel);
+      this.state.batteryLevel = batteryLevel;
+    }
+  }
+
   doPolledChecks() {
     this.checkContact()
     this.checkLowBattery()
     this.checkCharging()
+    this.checkBatteryLevel()
   }
 }
 
