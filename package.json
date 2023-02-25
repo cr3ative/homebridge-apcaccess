@@ -6,7 +6,10 @@
   "scripts": {
     "test": "npm run lint && npm run format",
     "format": "prettier-eslint --write —eslint-config-path $(pwd)/.eslintrc.js \"$(pwd)/**/*.js\"",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepublishOnly": "npm run test",
+    "postpublish": "PACKAGE_VERSION=$(cat package.json | grep \\\"version\\\" | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag v$PACKAGE_VERSION && git push --tags"
   },
   "keywords": [
     "homebridge-plugin",
