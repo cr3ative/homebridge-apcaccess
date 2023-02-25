@@ -54,10 +54,7 @@ class APCAccess {
 
     this.informationService = new Service.AccessoryInformation();
     this.informationService
-      .setCharacteristic(
-        Characteristic.Manufacturer,
-        config.manufacturer || DEFAULT_MANIFACTURER,
-      )
+      .setCharacteristic(Characteristic.Manufacturer, config.manufacturer || DEFAULT_MANIFACTURER)
       .setCharacteristic(Characteristic.Model, config.model || DEFAULT_MODEL)
       .setCharacteristic(Characteristic.SerialNumber, config.serial || UNKOWN);
     // End of vanity values ;)
@@ -92,11 +89,13 @@ class APCAccess {
   }
 
   getLatestJSON() {
-    this.client.getStatusJson().then((result) => {
-      this.latestJSON = result;
-      if (!this.loaded) this.firstRun();
-      this.doPolledChecks();
-    })
+    this.client
+      .getStatusJson()
+      .then((result) => {
+        this.latestJSON = result;
+        if (!this.loaded) this.firstRun();
+        this.doPolledChecks();
+      })
       .catch((err) => {
         this.log.error('Polling UPS service failed:', err);
       });
@@ -131,27 +130,26 @@ class APCAccess {
       const tempArray = tempVal.split('.');
       tempPctValue = parseFloat(parseFloat(tempArray[0] * -1) * -1);
       this.log.update.info('Temperature:', tempPctValue);
-    } else if(this.loaded){
+    } else if (this.loaded) {
       this.log.update.error('Unable to determine Temperature');
     }
 
     callback(null, tempPctValue);
   }
 
-  parseBatteryLevel  = () =>  this.loaded ? parseInt(this.latestJSON.BCHARGE, 10) : 0;
+  parseBatteryLevel = () => (this.loaded ? parseInt(this.latestJSON.BCHARGE, 10) : 0);
 
-  parseTimeLeft = () => this.loaded ? parseInt(this.latestJSON.TIMELEFT, 10) : 0;
+  parseTimeLeft = () => (this.loaded ? parseInt(this.latestJSON.TIMELEFT, 10) : 0);
 
   parseContactValue = () => (this.latestJSON.STATFLAG & UPS_ACTIVE ? 'CONTACT_DETECTED' : 'CONTACT_NOT_DETECTED');
 
   parseLowBatteryValue = () => (this.latestJSON.STATFLAG & UPS_BATT_LOW ? 'BATTERY_LEVEL_LOW' : 'BATTERY_LEVEL_NORMAL');
 
-  parseChargingState = () => this.latestJSON.STATFLAG & UPS_NOT_CHARGEABLE
+  parseChargingState = () => (this.latestJSON.STATFLAG & UPS_NOT_CHARGEABLE
     ? 'NOT_CHARGEABLE'
     : this.latestJSON.STATFLAG & UPS_NOT_CHARGING || this.parseBatteryLevel() === FULLY_CHARGED
       ? 'NOT_CHARGING'
-      : 'CHARGING';
-
+      : 'CHARGING');
 
   checkContact() {
     const contactBool = Characteristic.ContactSensorState[this.parseContactValue()];
@@ -182,10 +180,10 @@ class APCAccess {
   }
 
   checkCharging() {
-    const value = this.parseChargingState()
+    const value = this.parseChargingState();
     const chargingState = Characteristic.ChargingState[value];
 
-    this.log.update.info('Charging state:', value)
+    this.log.update.info('Charging state:', value);
 
     if (this.state.chargingState !== chargingState) {
       this.log.debug('Pushing charging state change; ', chargingState, this.state.chargingState);
@@ -200,21 +198,22 @@ class APCAccess {
     const batteryLevel = this.parseBatteryLevel();
 
     if (this.state.batteryLevel !== batteryLevel) {
-      this.log.update.info('Battery Level:', `${batteryLevel}% (${this.parseTimeLeft()} estimated minutes remaining)`);
+      this.log.update.info(
+        'Battery Level:',
+        `${batteryLevel}% (${this.parseTimeLeft()} estimated minutes remaining)`,
+      );
       this.log.debug('Pushing battery level change; ', batteryLevel, this.state.batteryLevel);
 
-      this.batteryService
-        .getCharacteristic(Characteristic.BatteryLevel)
-        .updateValue(batteryLevel);
+      this.batteryService.getCharacteristic(Characteristic.BatteryLevel).updateValue(batteryLevel);
       this.state.batteryLevel = batteryLevel;
     }
   }
 
   doPolledChecks() {
-    this.checkContact()
-    this.checkLowBattery()
-    this.checkCharging()
-    this.checkBatteryLevel()
+    this.checkContact();
+    this.checkLowBattery();
+    this.checkCharging();
+    this.checkBatteryLevel();
   }
 }
 
