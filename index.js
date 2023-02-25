@@ -1,20 +1,20 @@
 const ApcAccess = require('apcaccess');
 const { logOnlyError, logMin } = require('./lib/logUpdate');
 
-const DEFAULT_INTERVAL = 1
-const DEFAULT_NAME = 'APC UPS'
-const DEFAULT_MANIFACTURER = 'American Power Conversion'
-const DEFAULT_MODEL = 'APCAccess UPS'
-const DEFAULT_PORT =  '3551'
+const DEFAULT_INTERVAL = 1;
+const DEFAULT_NAME = 'APC UPS';
+const DEFAULT_MANIFACTURER = 'American Power Conversion';
+const DEFAULT_MODEL = 'APCAccess UPS';
+const DEFAULT_PORT = '3551';
 
-const FULLY_CHARGED = 100
-const SECOND = 1000
-const UNKOWN = 'unkown'
+const FULLY_CHARGED = 100;
+const SECOND = 1000;
+const UNKOWN = 'unkown';
 
-const UPS_ACTIVE = 0x08
-const UPS_BATT_LOW = 0x40
-const UPS_NOT_CHARGEABLE = 0x80
-const UPS_NOT_CHARGING = 0x10 
+const UPS_ACTIVE = 0x08;
+const UPS_BATT_LOW = 0x40;
+const UPS_NOT_CHARGEABLE = 0x80;
+const UPS_NOT_CHARGING = 0x10;
 
 let Service;
 let Characteristic;
@@ -22,8 +22,9 @@ let Characteristic;
 class APCAccess {
   constructor(log, config) {
     this.config = config || Object.create(null);
-    this.log = config.errorLogsOnly ? logOnlyError(log) :logMin(log);
+    this.log = config.errorLogsOnly ? logOnlyError(log) : logMin(log);
     this.latestJSON = false;
+    this.loaded = false;
 
     this.client = new ApcAccess();
     this.client
@@ -37,10 +38,12 @@ class APCAccess {
         this.log.error("Couldn't connect to service:", err);
       });
 
-    this.state = {
+    this.state = Object.seal({
       contact: 0,
       lowBattery: 0,
-    };
+      minutes: 0,
+      charging: undefined,
+    });
 
     // The following can't be defined on boot, so define them optionally in config
     this.contactSensor = new Service.ContactSensor(config.name || DEFAULT_NAME);
@@ -61,15 +64,15 @@ class APCAccess {
     this.batteryService = new Service.BatteryService();
     this.batteryService
       .getCharacteristic(Characteristic.BatteryLevel)
-      .on('get', this.getBatteryLevel.bind(this))
+      .on('get', this.getBatteryLevel.bind(this));
     this.batteryService
       .getCharacteristic(Characteristic.ChargingState)
-      .on('get', this.getChargingState.bind(this))
+      .on('get', this.getChargingState.bind(this));
     this.batteryService
       .getCharacteristic(Characteristic.StatusLowBattery)
       .on('get', this.getStatusLowBattery.bind(this));
 
-    if(!this.config.temperatureSensor) return;
+    if (!this.config.temperatureSensor) return;
     this.temperatureService = new Service.TemperatureSensor();
     this.temperatureService
       .getCharacteristic(Characteristic.CurrentTemperature)
@@ -90,11 +93,16 @@ class APCAccess {
   getLatestJSON() {
     this.client.getStatusJson().then((result) => {
       this.latestJSON = result;
+      if (!this.loaded) this.firstRun();
       this.doPolledChecks();
     })
-    .catch((err) => {
-      this.log.error("Polling device failed:", err);
-    });
+      .catch((err) => {
+        this.log.error('Polling UPS service failed:', err);
+      });
+  }
+
+  firstRun() {
+    this.loaded = true;
   }
 
   getBatteryLevel(callback) {
@@ -105,9 +113,9 @@ class APCAccess {
     if (battVal !== undefined) {
       const battArray = battVal.split('.');
       battPctValue = parseFloat(parseFloat(battArray[0] * -1) * -1);
+      this.log.update.info('Battery Level:', `${battPctValue} (${this.latestJSON.TIMELEFT})`);
     }
 
-    this.log.update.info('Battery Level: ', battPctValue);
     callback(null, battPctValue);
   }
 
@@ -120,25 +128,17 @@ class APCAccess {
         ? 'NOT_CHARGING'
         : 'CHARGING';
 
-    this.log.update.info('Charging state: ', value);
+    if (this.loaded) this.log.update.info('Charging state:', value);
     callback(null, Characteristic.ChargingState[value]);
   }
 
   getStatusLowBattery(callback) {
-    // STATFLAG
-    const value = this.latestJSON.STATFLAG & UPS_BATT_LOW ? 'BATTERY_LEVEL_LOW' : 'BATTERY_LEVEL_NORMAL';
-
-    this.log.update.info('Low Battery? ', value);
-    callback(null, Characteristic.StatusLowBattery[value]);
+    callback(null, Characteristic.StatusLowBattery[this.getLowBatteryValue()]);
   }
 
   getContactState(callback) {
     // STATFLAG
     const value = [this.latestJSON.STATFLAG & UPS_ACTIVE ? 'CONTACT_DETECTED' : 'CONTACT_NOT_DETECTED'];
-
-    if (value === 'CONTACT_NOT_DETECTED') {
-      this.log.update.warn('Power Disconnected - Estimated time remaining:', this.latestJSON.TIMELEFT)
-    }
 
     callback(null, Characteristic.ContactSensorState[value]);
   }
@@ -151,7 +151,7 @@ class APCAccess {
     if (tempVal !== undefined) {
       const tempArray = tempVal.split('.');
       tempPctValue = parseFloat(parseFloat(tempArray[0] * -1) * -1);
-      this.log.update.info('Temperature: ', tempPctValue);
+      this.log.update.info('Temperature:', tempPctValue);
     } else {
       this.log.update.error('Unable to determine Temperature');
     }
@@ -159,17 +159,18 @@ class APCAccess {
     callback(null, tempPctValue);
   }
 
+  getContactValue = () => (this.latestJSON.STATFLAG & UPS_ACTIVE ? 'CONTACT_DETECTED' : 'CONTACT_NOT_DETECTED');
+
+  getLowBatteryValue = () => (this.latestJSON.STATFLAG & UPS_BATT_LOW ? 'BATTERY_LEVEL_LOW' : 'BATTERY_LEVEL_NORMAL');
+
   doPolledChecks() {
-    const contactValue = [
-      this.latestJSON.STATFLAG & UPS_ACTIVE ? 'CONTACT_DETECTED' : 'CONTACT_NOT_DETECTED',
-    ];
-    const contactBool = Characteristic.ContactSensorState[contactValue];
-    const lowBattValue = this.latestJSON.STATFLAG & UPS_BATT_LOW ? 'BATTERY_LEVEL_LOW' : 'BATTERY_LEVEL_NORMAL';
-    const lowBattBool = Characteristic.StatusLowBattery[lowBattValue];
+    const contactBool = Characteristic.ContactSensorState[this.getContactValue()];
+    const lowBattBool = Characteristic.StatusLowBattery[this.getLowBatteryValue()];
 
     // push
     if (this.state.contact !== contactBool) {
       this.log.debug('Pushing contact state change; ', contactBool, this.state.contact);
+      this.log.update.warn('Power:', contactBool ? 'Disconnected' : 'Connected');
       this.contactSensor
         .getCharacteristic(Characteristic.ContactSensorState)
         .updateValue(contactBool);
@@ -178,6 +179,7 @@ class APCAccess {
 
     if (this.state.lowBattery !== lowBattBool) {
       this.log.debug('Pushing low battery state change; ', lowBattBool, this.state.lowBattery);
+      this.log.update[lowBattBool ? 'warn' : 'info']('Battery state:', lowBattBool ? 'Low' : 'Normal');
       this.contactSensor
         .getCharacteristic(Characteristic.StatusLowBattery)
         .updateValue(lowBattBool);
