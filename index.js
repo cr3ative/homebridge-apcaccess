@@ -199,10 +199,10 @@ class APCAccess {
   checkBatteryLevel() {
     const batteryLevel = this.parseBatteryLevel();
 
-    this.log.update.info('Battery Level:', `${batteryLevel}% (${this.parseTimeLeft()} estimated minutes remaining)`);
-
     if (this.state.batteryLevel !== batteryLevel) {
+      this.log.update.info('Battery Level:', `${batteryLevel}% (${this.parseTimeLeft()} estimated minutes remaining)`);
       this.log.debug('Pushing battery level change; ', batteryLevel, this.state.batteryLevel);
+
       this.batteryService
         .getCharacteristic(Characteristic.BatteryLevel)
         .updateValue(batteryLevel);
