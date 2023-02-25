@@ -140,7 +140,7 @@ class APCAccess {
 
   parseBatteryLevel  = () =>  this.loaded ? parseInt(this.latestJSON.BCHARGE, 10) : 0;
 
-  parseTimeLeft = ( Minutes) => this.loaded ? parseInt(this.latestJSON.TIMELEFT, 10) : 0;
+  parseTimeLeft = () => this.loaded ? parseInt(this.latestJSON.TIMELEFT, 10) : 0;
 
   parseContactValue = () => (this.latestJSON.STATFLAG & UPS_ACTIVE ? 'CONTACT_DETECTED' : 'CONTACT_NOT_DETECTED');
 
