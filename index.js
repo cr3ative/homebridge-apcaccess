@@ -40,9 +40,10 @@ class APCAccess {
 
     this.state = Object.seal({
       contact: 0,
+      batteryLevel: 0,
       lowBattery: 0,
       minutes: 0,
-      charging: undefined,
+      chargingState: undefined,
     });
 
     // The following can't be defined on boot, so define them optionally in config
@@ -114,11 +115,7 @@ class APCAccess {
   }
 
   getChargingState(callback) {
-    const value = this.parseChargingState()
-
-    if (this.loaded) this.log.update.info('Charging state:', value);
-
-    callback(null, Characteristic.ChargingState[value]);
+    callback(null, Characteristic.ChargingState[this.parseChargingState()]);
   }
 
   getStatusLowBattery(callback) {
@@ -157,28 +154,54 @@ class APCAccess {
       ? 'NOT_CHARGING'
       : 'CHARGING';
 
-  doPolledChecks() {
-    const contactBool = Characteristic.ContactSensorState[this.parseContactValue()];
-    const lowBattBool = Characteristic.StatusLowBattery[this.parseLowBatteryValue()];
 
-    // push
+  checkContact() {
+    const contactBool = Characteristic.ContactSensorState[this.parseContactValue()];
+
+    this.log.update.warn('Power:', contactBool ? 'Disconnected' : 'Connected');
+
     if (this.state.contact !== contactBool) {
       this.log.debug('Pushing contact state change; ', contactBool, this.state.contact);
-      this.log.update.warn('Power:', contactBool ? 'Disconnected' : 'Connected');
       this.contactSensor
         .getCharacteristic(Characteristic.ContactSensorState)
         .updateValue(contactBool);
       this.state.contact = contactBool;
     }
+  }
 
-    if (this.state.lowBattery !== lowBattBool) {
-      this.log.debug('Pushing low battery state change; ', lowBattBool, this.state.lowBattery);
-      this.log.update[lowBattBool ? 'warn' : 'info']('Battery state:', lowBattBool ? 'Low' : 'Normal');
-      this.contactSensor
+  checkLowBattery() {
+    const lowBattery = Characteristic.StatusLowBattery[this.parseLowBatteryValue()];
+
+    this.log.update[lowBattery ? 'warn' : 'info']('Battery state:', lowBattery ? 'Low' : 'Normal');
+
+    if (this.state.lowBattery !== lowBattery) {
+      this.log.debug('Pushing low battery state change; ', lowBattery, this.state.lowBattery);
+      this.batteryService
         .getCharacteristic(Characteristic.StatusLowBattery)
-        .updateValue(lowBattBool);
-      this.state.lowBattery = lowBattBool;
+        .updateValue(lowBattery);
+      this.state.lowBattery = lowBattery;
     }
+  }
+
+  checkCharging() {
+    const value = this.parseChargingState()
+    const chargingState = Characteristic.ChargingState[value];
+
+    this.log.update.info('Charging state:', value)
+
+    if (this.state.chargingState !== chargingState) {
+      this.log.debug('Pushing charging state change; ', chargingState, this.state.chargingState);
+      this.batteryService
+        .getCharacteristic(Characteristic.ChargingState)
+        .updateValue(chargingState);
+      this.state.chargingState = chargingState;
+    }
+  }
+
+  doPolledChecks() {
+    this.checkContact()
+    this.checkLowBattery()
+    this.checkCharging()
   }
 }
 
