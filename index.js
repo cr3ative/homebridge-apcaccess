@@ -106,41 +106,27 @@ class APCAccess {
   }
 
   getBatteryLevel(callback) {
-    // BCHARGE
-    let battPctValue = 0;
-    const battVal = this.latestJSON.BCHARGE;
+    const battPctValue = this.parseBatteryLevel();
 
-    if (battVal !== undefined) {
-      const battArray = battVal.split('.');
-      battPctValue = parseFloat(parseFloat(battArray[0] * -1) * -1);
-      this.log.update.info('Battery Level:', `${battPctValue} (${this.latestJSON.TIMELEFT})`);
-    }
-
+    if(this.loaded) this.log.update.info('Battery Level:', `${battPctValue}% (${this.latestJSON.TIMELEFT})`);
+    
     callback(null, battPctValue);
   }
 
   getChargingState(callback) {
-    // STATFLAG
-    const percentage = parseInt(this.latestJSON.BCHARGE, 10);
-    const value = this.latestJSON.STATFLAG & UPS_NOT_CHARGEABLE
-      ? 'NOT_CHARGEABLE'
-      : this.latestJSON.STATFLAG & UPS_NOT_CHARGING || percentage === FULLY_CHARGED
-        ? 'NOT_CHARGING'
-        : 'CHARGING';
+    const value = this.parseChargingState()
 
     if (this.loaded) this.log.update.info('Charging state:', value);
+
     callback(null, Characteristic.ChargingState[value]);
   }
 
   getStatusLowBattery(callback) {
-    callback(null, Characteristic.StatusLowBattery[this.getLowBatteryValue()]);
+    callback(null, Characteristic.StatusLowBattery[this.parseLowBatteryValue()]);
   }
 
   getContactState(callback) {
-    // STATFLAG
-    const value = [this.latestJSON.STATFLAG & UPS_ACTIVE ? 'CONTACT_DETECTED' : 'CONTACT_NOT_DETECTED'];
-
-    callback(null, Characteristic.ContactSensorState[value]);
+    callback(null, Characteristic.ContactSensorState[this.parseContactValue()]);
   }
 
   getTemperature(callback) {
@@ -152,20 +138,28 @@ class APCAccess {
       const tempArray = tempVal.split('.');
       tempPctValue = parseFloat(parseFloat(tempArray[0] * -1) * -1);
       this.log.update.info('Temperature:', tempPctValue);
-    } else {
+    } else if(this.loaded){
       this.log.update.error('Unable to determine Temperature');
     }
 
     callback(null, tempPctValue);
   }
 
-  getContactValue = () => (this.latestJSON.STATFLAG & UPS_ACTIVE ? 'CONTACT_DETECTED' : 'CONTACT_NOT_DETECTED');
+  parseBatteryLevel  = () =>  this.loaded ? parseInt(this.latestJSON.BCHARGE, 10) : 0;
 
-  getLowBatteryValue = () => (this.latestJSON.STATFLAG & UPS_BATT_LOW ? 'BATTERY_LEVEL_LOW' : 'BATTERY_LEVEL_NORMAL');
+  parseContactValue = () => (this.latestJSON.STATFLAG & UPS_ACTIVE ? 'CONTACT_DETECTED' : 'CONTACT_NOT_DETECTED');
+
+  parseLowBatteryValue = () => (this.latestJSON.STATFLAG & UPS_BATT_LOW ? 'BATTERY_LEVEL_LOW' : 'BATTERY_LEVEL_NORMAL');
+
+  parseChargingState = () => this.latestJSON.STATFLAG & UPS_NOT_CHARGEABLE
+    ? 'NOT_CHARGEABLE'
+    : this.latestJSON.STATFLAG & UPS_NOT_CHARGING || this.parseBatteryLevel() === FULLY_CHARGED
+      ? 'NOT_CHARGING'
+      : 'CHARGING';
 
   doPolledChecks() {
-    const contactBool = Characteristic.ContactSensorState[this.getContactValue()];
-    const lowBattBool = Characteristic.StatusLowBattery[this.getLowBatteryValue()];
+    const contactBool = Characteristic.ContactSensorState[this.parseContactValue()];
+    const lowBattBool = Characteristic.StatusLowBattery[this.parseLowBatteryValue()];
 
     // push
     if (this.state.contact !== contactBool) {
