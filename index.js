@@ -46,7 +46,6 @@ class APCAccess {
       chargingState: undefined,
     });
 
-    // The following can't be defined on boot, so define them optionally in config
     this.contactSensor = new Service.ContactSensor(config.name || DEFAULT_NAME);
     this.contactSensor
       .getCharacteristic(Characteristic.ContactSensorState)
@@ -54,10 +53,8 @@ class APCAccess {
 
     this.informationService = new Service.AccessoryInformation();
     this.informationService
-      .setCharacteristic(Characteristic.Manufacturer, config.manufacturer || DEFAULT_MANIFACTURER)
-      .setCharacteristic(Characteristic.Model, config.model || DEFAULT_MODEL)
-      .setCharacteristic(Characteristic.SerialNumber, config.serial || UNKOWN);
-    // End of vanity values ;)
+    .setCharacteristic(Characteristic.Manufacturer, config.manufacturer || DEFAULT_MANIFACTURER)
+    .setCharacteristic(Characteristic.FirmwareRevision, 'UPS 09.3 / ID=18');
 
     this.batteryService = new Service.BatteryService();
     this.batteryService
@@ -93,8 +90,8 @@ class APCAccess {
       .getStatusJson()
       .then((result) => {
         this.latestJSON = result;
-        if (!this.loaded) this.firstRun();
         this.doPolledChecks();
+        if (!this.loaded) this.firstRun();
       })
       .catch((err) => {
         this.log.error('Polling UPS service failed:', err);
@@ -103,6 +100,24 @@ class APCAccess {
 
   firstRun() {
     this.loaded = true;
+    this.setDeviceInfo();
+  }
+
+  setDeviceInfo() {
+    // Property names match HK API
+    const deviceInfo = {
+      Model: 'MODEL',
+      Name: 'UPSNAME',
+      SerialNumber: 'SERIALNO',
+      SoftwareRevision: 'VERSION',
+      FirmwareRevision: 'FIRMWARE',
+    }
+
+    Object.entries(deviceInfo).forEach(([key, value]) => {
+      const info = this.parseData(value);
+      this.log.info(`${key}:`, info);
+      this.informationService.updateCharacteristic(Characteristic[key], info);
+    })
   }
 
   getBatteryLevel(callback) {
@@ -137,6 +152,8 @@ class APCAccess {
     callback(null, tempPctValue);
   }
 
+  parseData = (key) => this.latestJSON[key].trim() || UNKOWN
+ 
   parseBatteryLevel = () => (this.loaded ? parseInt(this.latestJSON.BCHARGE, 10) : 0);
 
   parseTimeLeft = () => (this.loaded ? parseInt(this.latestJSON.TIMELEFT, 10) : 0);
@@ -200,7 +217,7 @@ class APCAccess {
     if (this.state.batteryLevel !== batteryLevel) {
       this.log.update.info(
         'Battery Level:',
-        `${batteryLevel}% (${this.parseTimeLeft()} estimated minutes remaining)`,
+        `${batteryLevel}%  ${this.parseData('BATTV')} (${this.parseTimeLeft()} estimated minutes remaining)`,
       );
       this.log.debug('Pushing battery level change; ', batteryLevel, this.state.batteryLevel);
 
