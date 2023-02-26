@@ -13,7 +13,7 @@ This accessory:
 
 # Configuration
 
-The plugin will run with these default values, they can be changed the your `accessories: []` section of homebridge config:
+The plugin will run with these default values, they can be changed in the `accessories: []` section of homebridge config:
 
 ```
 {
@@ -28,4 +28,4 @@ The plugin will run with these default values, they can be changed the your `acc
 }
 ```
 
-All pretty self explanatory; `interval` is in seconds.
+`interval` is in seconds.
