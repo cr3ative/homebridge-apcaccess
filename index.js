@@ -21,7 +21,7 @@ let Characteristic;
 
 class APCAccess {
   constructor(log, config) {
-    if(!config) return;
+    if (!config) return;
 
     this.config = config;
     this.log = config.errorLogsOnly ? logOnlyError(log) : logMin(log);
@@ -115,13 +115,13 @@ class APCAccess {
       SerialNumber: 'SERIALNO',
       SoftwareRevision: 'VERSION',
       FirmwareRevision: 'FIRMWARE',
-    }
+    };
 
     Object.entries(deviceInfo).forEach(([key, value]) => {
       const info = this.parseData(value);
       this.log.info(`${key}:`, info);
       this.informationService.updateCharacteristic(Characteristic[key], info);
-    })
+    });
   }
 
   getBatteryLevel(callback) {
@@ -156,8 +156,8 @@ class APCAccess {
     callback(null, tempPctValue);
   }
 
-  parseData = (key) => this.latestJSON[key].trim() || UNKOWN
- 
+  parseData = (key) => this.latestJSON[key].trim() || UNKOWN;
+
   parseBatteryLevel = () => (this.loaded ? parseInt(this.latestJSON.BCHARGE, 10) : 0);
 
   parseTimeLeft = () => (this.loaded ? parseInt(this.latestJSON.TIMELEFT, 10) : 0);
