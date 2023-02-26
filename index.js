@@ -21,7 +21,9 @@ let Characteristic;
 
 class APCAccess {
   constructor(log, config) {
-    this.config = config || Object.create(null);
+    if(!config) return;
+
+    this.config = config;
     this.log = config.errorLogsOnly ? logOnlyError(log) : logMin(log);
     this.latestJSON = false;
     this.loaded = false;
@@ -53,8 +55,10 @@ class APCAccess {
 
     this.informationService = new Service.AccessoryInformation();
     this.informationService
-    .setCharacteristic(Characteristic.Manufacturer, config.manufacturer || DEFAULT_MANIFACTURER)
-    .setCharacteristic(Characteristic.FirmwareRevision, 'UPS 09.3 / ID=18');
+      .setCharacteristic(Characteristic.Manufacturer, config.manufacturer || DEFAULT_MANIFACTURER)
+      .setCharacteristic(Characteristic.Model, config.model || DEFAULT_MODEL)
+      .setCharacteristic(Characteristic.Name, config.name || DEFAULT_NAME)
+      .setCharacteristic(Characteristic.FirmwareRevision, UNKOWN);
 
     this.batteryService = new Service.BatteryService();
     this.batteryService
@@ -143,7 +147,7 @@ class APCAccess {
 
     if (tempVal !== undefined) {
       const tempArray = tempVal.split('.');
-      tempPctValue = parseFloat(parseFloat(tempArray[0] * -1) * -1);
+      tempPctValue = parseInt(tempArray[0], 10);
       this.log.update.info('Temperature:', tempPctValue);
     } else if (this.loaded) {
       this.log.update.error('Unable to determine Temperature');
