@@ -59,7 +59,8 @@ class APCAccess {
       .setCharacteristic(Characteristic.Model, config.model || DEFAULT_MODEL)
       .setCharacteristic(Characteristic.Name, config.name || DEFAULT_NAME)
       .setCharacteristic(Characteristic.SerialNumber, config.serial || UNKNOWN)
-      .setCharacteristic(Characteristic.FirmwareRevision, config.firmware || UNKNOWN);
+      .setCharacteristic(Characteristic.FirmwareRevision, config.firmwareRevision || UNKNOWN)
+      .setCharacteristic(Characteristic.SoftwareRevision, config.softwareRevision || UNKNOWN);
 
     this.batteryService = new Service.BatteryService();
     this.batteryService
