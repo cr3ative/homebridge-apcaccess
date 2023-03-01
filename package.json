@@ -1,12 +1,15 @@
 {
   "name": "homebridge-apcaccess",
-  "version": "0.2.2-rc4",
+  "version": "1.0.0",
   "description": "Ridiculously simple apcaccess wrapper",
   "main": "index.js",
   "scripts": {
     "test": "npm run lint && npm run format",
     "format": "prettier-eslint --write —eslint-config-path $(pwd)/.eslintrc.js \"$(pwd)/**/*.js\"",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "prepublishOnly": "npm run test",
+    "postpublish": "PACKAGE_VERSION=$(cat package.json | grep \\\"version\\\" | head -1 | awk -F: '{ print $2 }' | sed 's/[\",]//g' | tr -d '[[:space:]]') && git tag v$PACKAGE_VERSION && git push --tags"
   },
   "keywords": [
     "homebridge-plugin",
@@ -16,7 +19,8 @@
     "apcupsd"
   ],
   "engines": {
-    "homebridge": ">=0.2.5"
+    "node": ">=14.18.1",
+    "homebridge": ">=1.3.5"
   },
   "author": "Paul Curry",
   "license": "MIT",
@@ -32,11 +36,11 @@
   },
   "homepage": "https://github.com/cr3ative/homebridge-apcaccess#readme",
   "devDependencies": {
-    "eslint": "^6.8.0",
-    "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-plugin-import": "^2.20.0",
-    "prettier": "^1.19.1",
-    "prettier-eslint": "^9.0.1",
-    "prettier-eslint-cli": "^5.0.0"
+    "eslint": "^8.35.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.27.5",
+    "prettier": "^2.8.4",
+    "prettier-eslint": "^15.0.1",
+    "prettier-eslint-cli": "^7.1.0"
   }
 }
