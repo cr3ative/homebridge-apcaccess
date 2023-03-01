@@ -23,6 +23,7 @@ The plugin will run with these default values, they can be changed in the `acces
     "manufacturer": "American Power Conversion'",
     "model": "APCAccess UPS",
     "serial": "unknown",
+    "firmware": "unknown",
     "interval": 1,
     "temperatureSensor": false,
     "errorLogsOnly": false
