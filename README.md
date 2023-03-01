@@ -11,17 +11,18 @@ This accessory:
 - Publishes `ContactSensor` two subscribable events: `Contact State` and `Low Battery`, for your push alerting pleasure.
 - Optionally publishes a `TemperatureSensor` if you have a fancy UPS which reports this.
 
-# Configuration
+## Configuration
 
 The plugin will run with these default values, they can be changed in the `accessories: []` section of homebridge config:
 
-```
+```json
 {
     "name": "APC UPS",
     "host": "127.0.0.1",
     "port": 3551,
     "manufacturer": "American Power Conversion'",
     "model": "APCAccess UPS",
+    "serial": "unknown",
     "interval": 1,
     "temperatureSensor": false,
     "errorLogsOnly": false

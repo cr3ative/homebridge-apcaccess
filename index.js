@@ -3,13 +3,13 @@ const { logOnlyError, logMin } = require('./lib/logUpdate');
 
 const DEFAULT_INTERVAL = 1;
 const DEFAULT_NAME = 'APC UPS';
-const DEFAULT_MANIFACTURER = 'American Power Conversion';
+const DEFAULT_MANUFACTURER = 'American Power Conversion';
 const DEFAULT_MODEL = 'APCAccess UPS';
 const DEFAULT_PORT = '3551';
 
 const FULLY_CHARGED = 100;
 const SECOND = 1000;
-const UNKOWN = 'unkown';
+const UNKNOWN = 'unknown';
 
 const UPS_ACTIVE = 0x08;
 const UPS_BATT_LOW = 0x40;
@@ -55,10 +55,11 @@ class APCAccess {
 
     this.informationService = new Service.AccessoryInformation();
     this.informationService
-      .setCharacteristic(Characteristic.Manufacturer, config.manufacturer || DEFAULT_MANIFACTURER)
+      .setCharacteristic(Characteristic.Manufacturer, config.manufacturer || DEFAULT_MANUFACTURER)
       .setCharacteristic(Characteristic.Model, config.model || DEFAULT_MODEL)
       .setCharacteristic(Characteristic.Name, config.name || DEFAULT_NAME)
-      .setCharacteristic(Characteristic.FirmwareRevision, UNKOWN);
+      .setCharacteristic(Characteristic.SerialNumber, config.serial || UNKNOWN)
+      .setCharacteristic(Characteristic.FirmwareRevision, UNKNOWN);
 
     this.batteryService = new Service.BatteryService();
     this.batteryService
@@ -156,7 +157,7 @@ class APCAccess {
     callback(null, tempPctValue);
   }
 
-  parseData = (key) => this.latestJSON[key].trim() || UNKOWN;
+  parseData = (key) => this.latestJSON[key].trim() || UNKNOWN;
 
   parseBatteryLevel = () => (this.loaded ? parseInt(this.latestJSON.BCHARGE, 10) : 0);
 
@@ -221,7 +222,9 @@ class APCAccess {
     if (this.state.batteryLevel !== batteryLevel) {
       this.log.update.info(
         'Battery Level:',
-        `${batteryLevel}%  ${this.parseData('BATTV')} (${this.parseTimeLeft()} estimated minutes remaining)`,
+        `${batteryLevel}%  ${this.parseData(
+          'BATTV',
+        )} (${this.parseTimeLeft()} estimated minutes remaining)`,
       );
       this.log.debug('Pushing battery level change; ', batteryLevel, this.state.batteryLevel);
 
