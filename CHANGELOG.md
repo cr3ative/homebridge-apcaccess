@@ -1,3 +1,20 @@
+# [1.0.0]
+
+- Significant improvements / rewrite, sufficient to declare this v1.0.0, by [davidjbradshaw](https://github.com/davidjbradshaw). Thank you!
+- Push realtime data to HomeBridge, rather than just waiting for it to be pulled
+- Improved logging
+  - Power disconnect/reconnect is now a warning
+  - Battery level now shows time remaining and voltage
+  - warn/error now also have code to stop the same message being shown twice
+- Code refactor
+  - Created parse functions, to allow code reuse
+  - Upgraded to latest version of esLint/prettier
+  - log.update -> log.update.info
+  - Defined consts for bitwise values
+  - Defined consts for default values
+  - Defined consts for magic numbers
+- Updated README to show default values
+
 # [0.2.2]
 
 - Add optional temperature sensor. Optional temperature sensor added by [ThisIsQasim](https://github.com/ThisIsQasim). Thank you!
