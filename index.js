@@ -223,7 +223,7 @@ class APCAccess {
     if (this.state.batteryLevel !== batteryLevel) {
       this.log.update.info(
         'Battery Level:',
-        `${batteryLevel}%  ${this.parseData(
+        `${batteryLevel}% ${this.parseData(
           'BATTV',
         )} (${this.parseTimeLeft()} estimated minutes remaining)`,
       );
