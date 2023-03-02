@@ -1,3 +1,7 @@
+# [1.0.1]
+
+- Pretty new display name (via [davidjbradshaw](https://github.com/davidjbradshaw))
+
 # [1.0.0]
 
 - Significant improvements / rewrite, sufficient to declare this v1.0.0, by [davidjbradshaw](https://github.com/davidjbradshaw). Thank you!
