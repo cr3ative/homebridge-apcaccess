@@ -158,7 +158,7 @@ class APCAccess {
     callback(null, tempPctValue);
   }
 
-  parseData = (key) => this.latestJSON[key].trim() || UNKNOWN;
+  parseData = (key) => this.latestJSON[key]?.trim() || UNKNOWN;
 
   parseBatteryLevel = () => (this.loaded ? parseInt(this.latestJSON.BCHARGE, 10) : 0);
 
