@@ -1,3 +1,7 @@
+# [1.0.2]
+
+- BATTV isn't guaranteed to be present; fix parseData to not rely on key presence.
+
 # [1.0.1]
 
 - Pretty new display name (via [davidjbradshaw](https://github.com/davidjbradshaw))
