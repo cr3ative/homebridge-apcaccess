@@ -1,7 +1,7 @@
 {
   "displayName": "APC Access",
   "name": "homebridge-apcaccess",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Ridiculously simple apcaccess wrapper",
   "main": "index.js",
   "scripts": {

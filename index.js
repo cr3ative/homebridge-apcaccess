@@ -177,7 +177,7 @@ class APCAccess {
   checkContact() {
     const contactBool = Characteristic.ContactSensorState[this.parseContactValue()];
 
-    this.log.update.warn('Power:', contactBool ? 'Disconnected' : 'Connected');
+    this.log.update.info('Power:', contactBool ? 'Disconnected' : 'Connected');
 
     if (this.state.contact !== contactBool) {
       this.log.debug('Pushing contact state change; ', contactBool, this.state.contact);
@@ -191,7 +191,7 @@ class APCAccess {
   checkLowBattery() {
     const lowBattery = Characteristic.StatusLowBattery[this.parseLowBatteryValue()];
 
-    this.log.update[lowBattery ? 'warn' : 'info']('Battery state:', lowBattery ? 'Low' : 'Normal');
+    this.log.update[lowBattery ? 'error' : 'info']('Battery state:', lowBattery ? 'Low' : 'Normal');
 
     if (this.state.lowBattery !== lowBattery) {
       this.log.debug('Pushing low battery state change; ', lowBattery, this.state.lowBattery);

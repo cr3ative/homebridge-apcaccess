@@ -1,3 +1,8 @@
+# [1.0.3]
+
+- Remove instances of WARN, log as INFO or ERROR only to clean up suppression.
+- Update packages.
+
 # [1.0.2]
 
 - BATTV isn't guaranteed to be present; fix parseData to not rely on key presence.
